@@ -4,8 +4,15 @@
 
 ## 文件说明
 
-- `taskpane.html`：Excel 插件侧边栏入口。
-- `assets/js/app.js`：核心逻辑，包含对话 UI、API 配置、Agent Loop、Excel 工具函数、手动工具执行器。
+- `taskpane.html`：Excel 插件侧边栏入口，按顺序加载下列脚本。
+- `assets/js/`：核心逻辑，按职责拆分为多个文件，统一挂载到全局 `window.App` 命名空间：
+  - `config.js`：常量、`PROVIDERS`、`I18N`、`SYSTEM_PROMPT`、`TOOL_DEFINITIONS`。
+  - `state.js`：全局 `state`、localStorage/会话存取、通用工具函数。
+  - `markdown.js`：对话气泡的 Markdown 渲染。
+  - `excel-tools.js`：全部 Office.js 工具实现与执行器 `TOOL_EXECUTORS`。
+  - `api.js`：OpenAI-compatible 接口调用与 Agent Loop。
+  - `ui.js`：界面渲染与 DOM 事件绑定。
+  - `app.js`：入口，仅负责 `Office.onReady` 初始化与首屏渲染。
 - `assets/css/app.css`：侧边栏样式。
 - `commands.html` / `assets/js/commands.js`：Ribbon 命令文件。
 - `manifest.prod.xml`：保留原生产域名 `https://dpoqb.top` 的清单。
