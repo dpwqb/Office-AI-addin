@@ -91,7 +91,8 @@
       sessions: '会话', usage: '用量统计', advanced: '高级工具', manualTool: '手动执行工具', run: '执行',
       toolName: '工具名称', params: '参数 JSON', output: '输出', demo: '当前不在 Excel/Office 环境中，Excel 工具只能在插件侧边栏里运行。',
       lang: 'EN', configuredShort: '已配置', notConfiguredShort: '未配置',
-      sessionHistory: '会话历史', noSessions: '暂无历史会话', confirmDeleteSession: '确定删除该会话吗？删除后不可恢复。', currentSession: '当前会话', confirm: '确认', cancel: '取消'
+      sessionHistory: '会话历史', noSessions: '暂无历史会话', confirmDeleteSession: '确定删除该会话吗？删除后不可恢复。', currentSession: '当前会话', confirm: '确认', cancel: '取消',
+      confirmEval: 'AI 请求执行以下 Office.js 代码，是否允许？', evalAllow: '允许执行', evalDeny: '拒绝'
     },
     en: {
       chat: 'Chat', settings: 'Settings', tools: 'Tools', newChat: 'New Chat', clear: 'Clear messages', deleteSession: 'Delete current session',
@@ -107,7 +108,8 @@
       sessions: 'Sessions', usage: 'Usage', advanced: 'Advanced tools', manualTool: 'Manual tool runner', run: 'Run',
       toolName: 'Tool name', params: 'Params JSON', output: 'Output', demo: 'Not currently running inside Excel/Office. Excel tools only work in the add-in task pane.',
       lang: '中文', configuredShort: 'Configured', notConfiguredShort: 'Not configured',
-      sessionHistory: 'Session History', noSessions: 'No sessions yet', confirmDeleteSession: 'Delete this session? This cannot be undone.', currentSession: 'Current session', confirm: 'Confirm', cancel: 'Cancel'
+      sessionHistory: 'Session History', noSessions: 'No sessions yet', confirmDeleteSession: 'Delete this session? This cannot be undone.', currentSession: 'Current session', confirm: 'Confirm', cancel: 'Cancel',
+      confirmEval: 'The AI requests to run the following Office.js code. Allow it?', evalAllow: 'Allow', evalDeny: 'Deny'
     }
   };
 
@@ -154,7 +156,8 @@ When the user asks about their workbook data, read it first. Be concise. Use A1 
     toolOutput: '',
     workbookLabel: '',
     sessionMenuOpen: false,
-    pendingDeleteSessionId: null
+    pendingDeleteSessionId: null,
+    pendingEval: null
   };
 
   function getStoredItem(key) { try { return (typeof window !== 'undefined' && window.localStorage) ? window.localStorage.getItem(key) : null; } catch { return null; } }
@@ -317,7 +320,37 @@ When the user asks about their workbook data, read it first. Be concise. Use A1 
     return out.join('');
   }
 
+  function captureUiState() {
+    const snap = { focused: null, atBottom: true, scrollTop: 0 };
+    try {
+      const el = document.activeElement;
+      if (el && (el.id === 'chat-input' || el.id === 'manual-args')) {
+        snap.focused = { id: el.id, value: el.value, start: el.selectionStart, end: el.selectionEnd };
+      }
+      const msgEl = document.getElementById('messages');
+      if (msgEl) {
+        snap.scrollTop = msgEl.scrollTop;
+        snap.atBottom = msgEl.scrollHeight - msgEl.scrollTop - msgEl.clientHeight < 40;
+      }
+    } catch {}
+    return snap;
+  }
+  function restoreUiState(snap) {
+    if (!snap) return;
+    if (snap.focused) {
+      const el = document.getElementById(snap.focused.id);
+      if (el) {
+        el.value = snap.focused.value;
+        el.focus();
+        try { el.setSelectionRange(snap.focused.start ?? el.value.length, snap.focused.end ?? el.value.length); } catch {}
+      }
+    }
+    const msgEl = document.getElementById('messages');
+    if (msgEl) msgEl.scrollTop = snap.atBottom ? msgEl.scrollHeight : snap.scrollTop;
+  }
+
   function render() {
+    const snap = captureUiState();
     document.documentElement.dataset.theme = state.theme;
     ensureSession();
     const configured = Boolean(state.settings.apiKey && state.settings.model && state.settings.customPrefixUrl);
@@ -401,9 +434,26 @@ When the user asks about their workbook data, read it first. Be concise. Use A1 
           </section>
         </main>
         <footer class="footer"><span>dpoqb in Excel · Plain Edition</span><span>${escapeHtml(state.settings.model || '')}</span></footer>
+        ${state.pendingEval ? `<div class="modal-overlay">
+          <div class="modal">
+            <div class="modal-title">${t('confirmEval')}</div>
+            <pre class="modal-code">${escapeHtml(String(state.pendingEval.code || '').slice(0, 4000))}</pre>
+            <div class="modal-actions">
+              <button class="secondary-btn" data-action="eval-deny">${t('evalDeny')}</button>
+              <button class="primary-btn" data-action="eval-allow">${t('evalAllow')}</button>
+            </div>
+          </div>
+        </div>` : ''}
       </div>`;
-    const msgEl = document.getElementById('messages');
-    if (msgEl) msgEl.scrollTop = msgEl.scrollHeight;
+    restoreUiState(snap);
+  }
+
+  function assistantBubbleHtml(m) {
+    let body = m.content ? `<div class="markdown">${renderMarkdown(m.content)}</div>` : '';
+    if (m.toolCalls && m.toolCalls.length) {
+      body += m.toolCalls.map(tc => `<div class="tool-block"><div class="tool-head"><span>${escapeHtml(tc.name)}</span><span class="status ${tc.status || 'running'}">${escapeHtml(tc.status || 'running')}</span></div><div class="tool-body">${escapeHtml(pretty(tc.args))}${tc.result ? '\n\n' + escapeHtml(trimToolText(tc.result)) : ''}</div></div>`).join('');
+    }
+    return body || '...';
   }
 
   function renderMessage(m) {
@@ -411,13 +461,20 @@ When the user asks about their workbook data, read it first. Be concise. Use A1 
       return `<div class="msg tool"><div class="bubble">${escapeHtml(m.name || 'tool')}\n${escapeHtml(trimToolText(m.content))}</div><div class="meta">${new Date(m.timestamp || now()).toLocaleTimeString()}</div></div>`;
     }
     if (m.role === 'assistant') {
-      let body = m.content ? `<div class="markdown">${renderMarkdown(m.content)}</div>` : '';
-      if (m.toolCalls && m.toolCalls.length) {
-        body += m.toolCalls.map(tc => `<div class="tool-block"><div class="tool-head"><span>${escapeHtml(tc.name)}</span><span class="status ${tc.status || 'running'}">${escapeHtml(tc.status || 'running')}</span></div><div class="tool-body">${escapeHtml(pretty(tc.args))}${tc.result ? '\n\n' + escapeHtml(trimToolText(tc.result)) : ''}</div></div>`).join('');
-      }
-      return `<div class="msg assistant"><div class="bubble">${body || '...'}</div><div class="meta">${new Date(m.timestamp || now()).toLocaleTimeString()}</div></div>`;
+      return `<div class="msg assistant"><div class="bubble">${assistantBubbleHtml(m)}</div><div class="meta">${new Date(m.timestamp || now()).toLocaleTimeString()}</div></div>`;
     }
     return `<div class="msg user"><div class="bubble">${escapeHtml(m.content)}</div><div class="meta">${new Date(m.timestamp || now()).toLocaleTimeString()}</div></div>`;
+  }
+
+  function patchStreamingMessage(assistantUi) {
+    const msgEl = document.getElementById('messages');
+    if (!msgEl) { render(); return; }
+    const bubbles = msgEl.querySelectorAll('.msg.assistant .bubble');
+    const bubble = bubbles[bubbles.length - 1];
+    if (!bubble) { render(); return; }
+    const atBottom = msgEl.scrollHeight - msgEl.scrollTop - msgEl.clientHeight < 40;
+    bubble.innerHTML = assistantBubbleHtml(assistantUi);
+    if (atBottom) msgEl.scrollTop = msgEl.scrollHeight;
   }
   function trimToolText(v) { const s = typeof v === 'string' ? v : pretty(v); return s.length > 4000 ? s.slice(0, 4000) + '\n... truncated ...' : s; }
 
@@ -493,6 +550,10 @@ When the user asks about their workbook data, read it first. Be concise. Use A1 
       ensureSession(); saveSessions(); render();
     } else if (action === 'run-tool') {
       await runManualTool();
+    } else if (action === 'eval-allow') {
+      resolvePendingEval(true);
+    } else if (action === 'eval-deny') {
+      resolvePendingEval(false);
     }
   });
 
@@ -548,8 +609,23 @@ When the user asks about their workbook data, read it first. Be concise. Use A1 
     if (!state.isWorking) return;
     state.stopRequested = true;
     if (state.abortController) state.abortController.abort();
+    if (state.pendingEval) { const p = state.pendingEval; state.pendingEval = null; p.resolve(false); }
     state.isWorking = false;
     render();
+  }
+
+  function confirmEvalCode(code) {
+    return new Promise(resolve => {
+      state.pendingEval = { code, resolve };
+      render();
+    });
+  }
+  function resolvePendingEval(allow) {
+    const pending = state.pendingEval;
+    if (!pending) return;
+    state.pendingEval = null;
+    render();
+    pending.resolve(allow);
   }
 
   async function sendUserMessage(text) {
@@ -617,7 +693,7 @@ When the user asks about their workbook data, read it first. Be concise. Use A1 
       let lastRender = 0;
       const scheduleStreamRender = () => {
         const ts = Date.now();
-        if (ts - lastRender > 80) { lastRender = ts; render(); }
+        if (ts - lastRender > 80) { lastRender = ts; patchStreamingMessage(assistantUi); }
       };
 
       const res = await callChatCompletions(messages, {
@@ -642,6 +718,17 @@ When the user asks about their workbook data, read it first. Be concise. Use A1 
           const uiCall = { id: tc.id, name, args, status: 'running', result: '' };
           assistantUi.toolCalls.push(uiCall); render();
           let toolResult;
+          if (name === 'eval_officejs') {
+            const code = String(args?.code || '');
+            const ok = await confirmEvalCode(code);
+            if (!ok) {
+              toolResult = { success: false, declined: true, error: 'User declined to run eval_officejs code.' };
+              uiCall.status = 'error'; uiCall.result = toolResult;
+              messages.push({ role: 'tool', tool_call_id: tc.id, name, content: JSON.stringify(toolResult) });
+              render();
+              continue;
+            }
+          }
           try {
             toolResult = await executeToolByName(name, args);
             if (state.stopRequested) throw makeAbortError();
@@ -1172,7 +1259,7 @@ When the user asks about their workbook data, read it first. Be concise. Use A1 
 
   async function getAllObjects(args = {}) {
     requireOffice();
-    const { sheetId, id } = args;
+    const { sheetId, id: objectId } = args;
     return Excel.run(async context => {
       const sheets = context.workbook.worksheets;
       sheets.load('items'); await context.sync();
@@ -1184,8 +1271,8 @@ When the user asks about their workbook data, read it first. Be concise. Use A1 
         const charts = sheet.charts; charts.load('items');
         const pivots = sheet.pivotTables; pivots.load('items');
         await context.sync();
-        for (const c of charts.items) { c.load('id,name'); await context.sync(); if (!id || c.id === id) objects.push({ id: c.id, type: 'chart', name: c.name, sheetId: Number(map.get(sheet.id)), sheetName: sheet.name }); }
-        for (const p of pivots.items) { p.load('id,name'); await context.sync(); if (!id || p.id === id) objects.push({ id: p.id, type: 'pivotTable', name: p.name, sheetId: Number(map.get(sheet.id)), sheetName: sheet.name }); }
+        for (const c of charts.items) { c.load('id,name'); await context.sync(); if (!objectId || c.id === objectId) objects.push({ id: c.id, type: 'chart', name: c.name, sheetId: Number(map.get(sheet.id)), sheetName: sheet.name }); }
+        for (const p of pivots.items) { p.load('id,name'); await context.sync(); if (!objectId || p.id === objectId) objects.push({ id: p.id, type: 'pivotTable', name: p.name, sheetId: Number(map.get(sheet.id)), sheetName: sheet.name }); }
       }
       return { success: true, objects };
     });
