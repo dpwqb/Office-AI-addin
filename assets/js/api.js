@@ -30,10 +30,8 @@
     }
     const conversation = toApiMessages(state.messages);
     const messages = [{ role: 'system', content: App.host.systemPrompt + metadataText }, ...conversation];
-    const ms = Number(state.settings.maxAgentSteps);
-    const maxSteps = Number.isFinite(ms) && ms > 0 ? ms : Infinity;
 
-    for (let step = 0; step < maxSteps; step++) {
+    while (true) {
       if (state.stopRequested) throw makeAbortError();
 
       const assistantUi = { role: 'assistant', content: '', timestamp: App.now(), toolCalls: [] };
@@ -108,8 +106,6 @@
       App.render();
       return;
     }
-
-    state.messages.push({ role: 'assistant', content: state.locale === 'zh' ? '工具调用步骤已达到上限，请继续发送指令让我接着完成。' : 'The tool-call step limit was reached. Send another instruction to continue.', timestamp: App.now() });
   }
 
   function toApiMessages(messages) {
