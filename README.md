@@ -24,7 +24,7 @@
 - `manifest.word.prod.xml` / `manifest.word.local.xml`：**Word** 清单（`Host Name="Document"`）。
 - `manifest.ppt.prod.xml` / `manifest.ppt.local.xml`：**PowerPoint** 清单（`Host Name="Presentation"`）。
   - 三套 manifest 的 `<Id>` 各自唯一，`SourceLocation` 均指向同一 `taskpane.html`。`*.prod.xml` 指向 `https://office-addin.dpoqb.top`，`*.local.xml` 指向 `http://localhost`。
-- `dpoqb-in-excel.html`：原安装说明页。
+- `dpoqb-in-office.html`：原安装说明页。
 - `assets/vendor/`：原项目引用/打包涉及的第三方或运行时资源，随包保留。
 
 ## 宿主适配层

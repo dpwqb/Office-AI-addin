@@ -8,7 +8,7 @@
   <Description DefaultValue="AI Chat for Word - Chat with LLMs directly in Word using your own API keys."/>
   <IconUrl DefaultValue="https://office-addin.dpoqb.top/assets/logo.png"/>
   <HighResolutionIconUrl DefaultValue="https://office-addin.dpoqb.top/assets/logo.png"/>
-  <SupportUrl DefaultValue="https://office-addin.dpoqb.top/dpoqb-in-excel.html"/>
+  <SupportUrl DefaultValue="https://office-addin.dpoqb.top/dpoqb-in-office.html"/>
   <AppDomains>
     <AppDomain>https://office-addin.dpoqb.top</AppDomain>
   </AppDomains>
