@@ -31,7 +31,7 @@
     const conversation = toApiMessages(state.messages);
     const messages = [{ role: 'system', content: App.host.systemPrompt + metadataText }, ...conversation];
     const ms = Number(state.settings.maxAgentSteps);
-    const maxSteps = Number.isFinite(ms) && ms > 0 ? ms : 8;
+    const maxSteps = Number.isFinite(ms) && ms > 0 ? ms : Infinity;
 
     for (let step = 0; step < maxSteps; step++) {
       if (state.stopRequested) throw makeAbortError();

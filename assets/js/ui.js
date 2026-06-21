@@ -27,17 +27,25 @@
   const maybeFollow = App.maybeFollow;
   const navigateCitation = App.navigateCitation;
 
+  const PANEL_SELECTORS = ['.settings-panel', '.tools-panel'];
   function captureUiState() {
-    const snap = { focused: null, atBottom: true, scrollTop: 0 };
+    const snap = { focused: null, atBottom: true, scrollTop: 0, panels: {} };
     try {
       const el = document.activeElement;
       if (el && (el.id === 'chat-input' || el.id === 'manual-args')) {
-        snap.focused = { id: el.id, value: el.value, start: el.selectionStart, end: el.selectionEnd };
+        snap.focused = { selector: '#' + el.id, value: el.value, start: el.selectionStart, end: el.selectionEnd };
+      } else if (el && el.dataset && el.dataset.bind) {
+        const canSelect = el.tagName === 'INPUT' || el.tagName === 'TEXTAREA';
+        snap.focused = { selector: `[data-bind="${el.dataset.bind}"]`, value: canSelect ? el.value : undefined, start: canSelect ? el.selectionStart : null, end: canSelect ? el.selectionEnd : null };
       }
       const msgEl = document.getElementById('messages');
       if (msgEl) {
         snap.scrollTop = msgEl.scrollTop;
         snap.atBottom = msgEl.scrollHeight - msgEl.scrollTop - msgEl.clientHeight < 40;
+      }
+      for (const sel of PANEL_SELECTORS) {
+        const panel = document.querySelector(sel);
+        if (panel) snap.panels[sel] = panel.scrollTop;
       }
     } catch {}
     return snap;
@@ -45,15 +53,21 @@
   function restoreUiState(snap) {
     if (!snap) return;
     if (snap.focused) {
-      const el = document.getElementById(snap.focused.id);
+      const el = document.querySelector(snap.focused.selector);
       if (el) {
-        el.value = snap.focused.value;
+        if (snap.focused.value !== undefined && 'value' in el) el.value = snap.focused.value;
         el.focus();
-        try { el.setSelectionRange(snap.focused.start ?? el.value.length, snap.focused.end ?? el.value.length); } catch {}
+        if (snap.focused.start != null) { try { el.setSelectionRange(snap.focused.start, snap.focused.end ?? snap.focused.start); } catch {} }
       }
     }
     const msgEl = document.getElementById('messages');
     if (msgEl) msgEl.scrollTop = snap.atBottom ? msgEl.scrollHeight : snap.scrollTop;
+    if (snap.panels) {
+      for (const sel of PANEL_SELECTORS) {
+        const panel = document.querySelector(sel);
+        if (panel && snap.panels[sel] != null) panel.scrollTop = snap.panels[sel];
+      }
+    }
   }
 
   function render() {
@@ -93,7 +107,7 @@
           <img class="logo" src="assets/logo.png" alt="logo" />
           <div class="title"><strong>${escapeHtml(brand)}</strong><span>${escapeHtml(state.workbookLabel || (configured ? t('configuredShort') : t('notConfiguredShort')))}</span></div>
           <div class="session-menu-wrap">
-            <button class="session-trigger" data-action="toggle-session-menu" title="${t('sessionHistory')}"><span>${t('sessions')}</span><strong>⌄</strong></button>
+            <button class="session-trigger" data-action="toggle-session-menu" title="${t('sessionHistory')}"><span>${t('sessions')}</span><strong>v</strong></button>
             ${state.sessionMenuOpen ? `<div class="session-menu">
               <div class="session-menu-head"><strong>${t('sessionHistory')}</strong><button class="secondary-btn compact" data-action="new-chat">＋ ${t('newChat')}</button></div>
               <div class="session-list header-session-list">${sessionsHtml}</div>
@@ -128,6 +142,7 @@
               <div class="field"><label>${t('model')}</label><select data-action="pick-model">${models.map(m => `<option value="${escapeHtml(m.id)}" ${state.settings.model === m.id ? 'selected' : ''}>${escapeHtml(m.name || m.id)}</option>`).join('')}<option value="__custom__">自定义模型 / Custom model</option></select><input data-bind="model" value="${escapeHtml(state.settings.model || '')}" placeholder="model id" /></div>
               <div class="field"><label>${t('apiKey')}</label><input data-bind="apiKey" value="${escapeHtml(state.settings.apiKey || '')}" type="password" placeholder="sk-..." /></div>
               <div class="field"><label>${t('thinking')}</label><select data-bind="thinking"><option value="none" ${state.settings.thinking === 'none' ? 'selected' : ''}>off</option><option value="low" ${state.settings.thinking === 'low' ? 'selected' : ''}>low</option><option value="medium" ${state.settings.thinking === 'medium' ? 'selected' : ''}>medium</option><option value="high" ${state.settings.thinking === 'high' ? 'selected' : ''}>high</option></select></div>
+              <div class="field"><label>${t('maxAgentSteps')}</label><input type="number" data-bind="maxAgentSteps" value="${escapeHtml(String(state.settings.maxAgentSteps ?? 0))}" min="0" placeholder="${t('maxAgentStepsHint')}" /></div>
               <label class="check"><input type="checkbox" data-bind="followMode" ${state.settings.followMode ? 'checked' : ''}/> ${t('followOn')}</label>
               <div class="hint">${configured ? t('configured') : t('notConfigured')}</div>
             </div>

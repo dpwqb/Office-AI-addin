@@ -20,7 +20,7 @@
     thinking: 'none',
     followMode: true,
     temperature: 0.2,
-    maxAgentSteps: 8
+    maxAgentSteps: 0
   };
 
   const PROVIDERS = {
@@ -90,6 +90,7 @@
       fixPrompt: '帮我检查当前文档的问题，并给出修复后的结果',
       analyzePrompt: '帮我全面分析当前文档内容，并输出汇总结论',
       provider: '服务商', env: '接口环境', model: '模型', apiKey: 'API 密钥', baseUrl: 'Base URL', thinking: '思考模式',
+      maxAgentSteps: '工具调用步骤上限', maxAgentStepsHint: '留空或 0 表示不限制',
       configured: 'API 已配置', notConfigured: '填写以上信息即可开始', about: '关于',
       aboutText: 'dpoqb Office 助手使用 AI 为你的 Office 文档提供智能对话能力。API 密钥仅保存在浏览器本地。',
       sessions: '会话', usage: '用量统计', advanced: '高级工具', manualTool: '手动执行工具', run: '执行',
@@ -110,6 +111,7 @@
       fixPrompt: 'Check the current document for issues and fix them',
       analyzePrompt: 'Analyze the current document and summarize key conclusions',
       provider: 'Provider', env: 'Environment', model: 'Model', apiKey: 'API Key', baseUrl: 'Base URL', thinking: 'Thinking Mode',
+      maxAgentSteps: 'Max Tool Steps', maxAgentStepsHint: 'Empty or 0 = unlimited',
       configured: 'API configured', notConfigured: 'Fill in all fields above to get started', about: 'About',
       aboutText: 'dpoqb Office Assistant gives your Office documents AI chat and action capabilities. API keys are only stored locally in your browser.',
       sessions: 'Sessions', usage: 'Usage', advanced: 'Advanced tools', manualTool: 'Manual tool runner', run: 'Run',
