@@ -1,8 +1,10 @@
-# dpoqb in Office - Plain HTML/JavaScript/CSS Rebuild
+# Office AI addin
 
-这是对原始 `office-addin.bigmodel.cn` 编译产物的可读版重构。核心页面已改为纯 `HTML + JavaScript + CSS`，没有 React/Vite 打包入口，便于直接阅读和二次修改。
+该项目是基于 `office-addin.bigmodel.cn` 的可读版重构。核心页面已改为纯 `HTML + JavaScript + CSS`。
 
 现已支持 **Excel / Word / PowerPoint 三个宿主**：一套代码包按 `Office.context.host` 自适应，每个宿主一份 manifest（指向同一 `taskpane.html`）。
+
+详细安装说明请参考 [dpoqb-in-office.html](dpoqb-in-office.html)。
 
 ## 文件说明
 
@@ -71,7 +73,7 @@ evalToolName, getMetadata(), navigateCitation(ref), follow(result), i18n
 Office Add-in 需要 HTTP 静态服务器。把对应宿主 `manifest.*.local.xml` 中的地址改为实际地址，并旁加载到对应的 Office 应用：
 
 ```bash
-cd office-addin-plain
+cd Office-AI-addin
 # 可用任意 HTTP 静态服务，端口与 manifest.excel.local.xml 保持一致
 ```
 

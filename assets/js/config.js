@@ -3,11 +3,11 @@
   const App = (window.App = window.App || {});
 
   const STORAGE_KEYS = {
-    settings: 'exceldpoqb-provider-config',
-    locale: 'dpoqbexcel-locale',
-    theme: 'dpoqbexcel-theme',
+    settings: 'officedpoqb-provider-config',
+    locale: 'dpoqboffice-locale',
+    theme: 'dpoqboffice-theme',
     sessions: 'OpenExcelDB_v3.sessions.plain',
-    workbookId: 'dpoqbexcel-workbook-id', // 通用 documentId（沿用旧键名，保持向后兼容）
+    workbookId: 'dpoqboffice-workbook-id', // 通用 documentId（沿用旧键名，保持向后兼容）
     sheetMap: 'dpoqbexcel-sheet-map-v1'   // 仅 Excel 使用
   };
 
