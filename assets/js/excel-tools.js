@@ -299,12 +299,25 @@
 
   async function modifySheetStructure(args) {
     requireOffice();
-    const { sheetId, operation, dimension = 'rows', reference, count = 1, position = 'before' } = args;
+    const { sheetId, operation, dimension = 'rows', reference, count, position = 'before' } = args;
     return Excel.run(async context => {
       const sheet = await worksheetById(context, sheetId);
       if (!sheet) throw new Error(`Worksheet with ID ${sheetId} not found`);
       if (operation === 'unfreeze') sheet.freezePanes.unfreeze();
-      else if (operation === 'freeze') dimension === 'columns' ? sheet.freezePanes.freezeColumns(Number(count || reference || 1)) : sheet.freezePanes.freezeRows(Number(count || reference || 1));
+      else if (operation === 'freeze') {
+        let n;
+        if (count != null && count !== '') {
+          n = Number(count);
+        } else if (reference != null && reference !== '') {
+          n = dimension === 'columns'
+            ? String(reference).toUpperCase().split('').reduce((a, ch) => a * 26 + ch.charCodeAt(0) - 64, 0)
+            : Number(reference);
+        } else {
+          n = 1;
+        }
+        if (!Number.isFinite(n) || n < 1) n = 1;
+        dimension === 'columns' ? sheet.freezePanes.freezeColumns(n) : sheet.freezePanes.freezeRows(n);
+      }
       else {
         let ref = reference;
         if (operation === 'insert' && position === 'after') {

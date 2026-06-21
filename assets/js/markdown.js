@@ -31,7 +31,7 @@
     html = html.replace(/~~([^~]+)~~/g, '<del>$1</del>');
     html = html.replace(/(^|\s)\*([^*\n]+)\*(?=\s|$|[,.!?;:，。！？；：])/g, '$1<em>$2</em>');
     html = html.replace(/(^|\s)_([^_\n]+)_(?=\s|$|[,.!?;:，。！？；：])/g, '$1<em>$2</em>');
-    codeParts.forEach((part, i) => { html = html.replace(`${SENTINEL}CODE${i}${SENTINEL}`, part); });
+    codeParts.forEach((part, i) => { html = html.replace(`${SENTINEL}CODE${i}${SENTINEL}`, () => part); });
     return html;
   }
 
@@ -61,7 +61,7 @@
         continue;
       }
 
-      const heading = line.match(/^\s{0,3}(#{1,6})\s+(.+)$/);
+      const heading = line.match(/^\s{0,3}(#{1,6})\s+(.*)$/);
       if (heading) {
         const level = heading[1].length;
         out.push(`<h${level}>${renderInline(heading[2].trim())}</h${level}>`);
@@ -79,7 +79,7 @@
       if (/^\s*[-*+]\s+/.test(line) || /^\s*\d+\.\s+/.test(line)) {
         const ordered = /^\s*\d+\.\s+/.test(line);
         const items = [];
-        const re = ordered ? /^\s*\d+\.\s+(.+)$/ : /^\s*[-*+]\s+(.+)$/;
+        const re = ordered ? /^\s*\d+\.\s+(.*)$/ : /^\s*[-*+]\s+(.*)$/;
         while (i < lines.length && re.test(lines[i])) {
           const item = lines[i].match(re)[1];
           items.push(`<li>${renderInline(item)}</li>`);
@@ -102,6 +102,7 @@
 
       const para = [];
       while (i < lines.length && lines[i].trim() && !isBlockStart(lines[i], lines[i + 1])) para.push(lines[i++]);
+      if (!para.length) { out.push(`<p>${renderInline(lines[i].trim())}</p>`); i++; continue; }
       out.push(`<p>${para.map(x => renderInline(x.trim())).join('<br>')}</p>`);
     }
     return out.join('');

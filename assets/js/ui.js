@@ -197,7 +197,7 @@
   function stopActiveRequest() {
     if (!state.isWorking) return;
     state.stopRequested = true;
-    if (state.abortController) state.abortController.abort();
+    if (state.abortController && typeof state.abortController.abort === 'function') state.abortController.abort();
     if (state.pendingEval) { const p = state.pendingEval; state.pendingEval = null; p.resolve(false); }
     state.isWorking = false;
     render();
@@ -221,7 +221,8 @@
     if (state.isWorking) return;
     state.error = null;
     state.stopRequested = false;
-    state.abortController = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const myController = typeof AbortController !== 'undefined' ? new AbortController() : { signal: undefined };
+    state.abortController = myController;
     ensureSession();
     state.messages.push({ role: 'user', content: text, timestamp: now() });
     state.isWorking = true;
@@ -238,8 +239,11 @@
         state.error = e.message || String(e);
       }
     } finally {
-      state.isWorking = false;
-      state.abortController = null;
+      // 仅当全局 controller 仍是本次请求时才复位，避免停止后立即重发时覆盖新请求的状态
+      if (state.abortController === myController) {
+        state.isWorking = false;
+        state.abortController = null;
+      }
       render();
     }
   }

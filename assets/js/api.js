@@ -30,7 +30,8 @@
     }
     const conversation = toApiMessages(state.messages);
     const messages = [{ role: 'system', content: App.SYSTEM_PROMPT + metadataText }, ...conversation];
-    const maxSteps = Number(state.settings.maxAgentSteps || 8);
+    const ms = Number(state.settings.maxAgentSteps);
+    const maxSteps = Number.isFinite(ms) && ms > 0 ? ms : 8;
 
     for (let step = 0; step < maxSteps; step++) {
       if (state.stopRequested) throw makeAbortError();
@@ -139,7 +140,9 @@
 
   async function callChatCompletions(messages, options = {}) {
     const state = App.state;
-    const body = { model: state.settings.model, messages, tools: App.TOOL_DEFINITIONS, tool_choice: 'auto', temperature: Number(state.settings.temperature || 0.2), stream: true };
+    const tmp = Number(state.settings.temperature);
+    const temperature = Number.isFinite(tmp) ? tmp : 0.2;
+    const body = { model: state.settings.model, messages, tools: App.TOOL_DEFINITIONS, tool_choice: 'auto', temperature, stream: true };
     if (state.settings.thinking && state.settings.thinking !== 'none') body.reasoning_effort = state.settings.thinking;
     const res = await fetch(App.chatEndpoint(), {
       method: 'POST',
