@@ -7,7 +7,11 @@
   function prefersDarkMode() { return typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(prefers-color-scheme: dark)').matches; }
   function getNavigatorLanguage() { return (typeof navigator !== 'undefined' && navigator.language) ? navigator.language : 'en'; }
 
-  function t(key) { return (App.I18N[state.locale] && App.I18N[state.locale][key]) || key; }
+  function t(key) {
+    const hostI18n = App.host && App.host.i18n && App.host.i18n[state.locale];
+    if (hostI18n && hostI18n[key] != null) return hostI18n[key];
+    return (App.I18N[state.locale] && App.I18N[state.locale][key]) || key;
+  }
   function loadLocale() { const v = getStoredItem(App.STORAGE_KEYS.locale); return v === 'en' || v === 'zh' ? v : (getNavigatorLanguage().startsWith('zh') ? 'zh' : 'en'); }
   function loadSettings() { try { return Object.assign({}, App.DEFAULT_SETTINGS, JSON.parse(getStoredItem(App.STORAGE_KEYS.settings) || '{}')); } catch { return { ...App.DEFAULT_SETTINGS }; } }
   function saveSettings() { setStoredItem(App.STORAGE_KEYS.settings, JSON.stringify(state.settings)); }
@@ -15,7 +19,12 @@
   function saveSessions() { setStoredItem(App.STORAGE_KEYS.sessions, JSON.stringify(state.sessions)); }
   function id() { const c = typeof crypto !== 'undefined' ? crypto : null; return (c && typeof c.randomUUID === 'function') ? c.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`; }
   function now() { return Date.now(); }
-  function hasOffice() { return typeof Office !== 'undefined' && typeof Excel !== 'undefined' && Excel.run; }
+  function hasOffice() {
+    if (typeof Office === 'undefined') return false;
+    const runtimeReady = (typeof Excel !== 'undefined' && !!Excel.run) || (typeof Word !== 'undefined' && !!Word.run) || (typeof PowerPoint !== 'undefined' && !!PowerPoint.run);
+    // 同时要求已选定一个可用的宿主提供者，避免 provider 选定失败时 UI 仍呈现为可用 Office 会话。
+    return runtimeReady && !!(App.host && App.host.available);
+  }
   function escapeHtml(s) { return String(s ?? '').replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch])); }
   function pretty(v) { try { return JSON.stringify(v, null, 2); } catch { return String(v); } }
   function normalizeBaseUrl(url) { return String(url || '').replace(/\/+$/, ''); }

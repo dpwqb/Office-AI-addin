@@ -25,11 +25,11 @@
     if (!state.settings.apiKey) throw new Error('Please configure API key first');
     let metadataText = '';
     if (App.hasOffice()) {
-      try { metadataText = '\n\nWorkbook metadata:\n' + JSON.stringify(await App.getWorkbookMetadata(), null, 2); }
-      catch (e) { metadataText = '\n\nWorkbook metadata unavailable: ' + e.message; }
+      try { metadataText = `\n\n${App.host.metadataLabel || 'Document metadata'}:\n` + JSON.stringify(await App.host.getMetadata(), null, 2); }
+      catch (e) { metadataText = '\n\nDocument metadata unavailable: ' + e.message; }
     }
     const conversation = toApiMessages(state.messages);
-    const messages = [{ role: 'system', content: App.SYSTEM_PROMPT + metadataText }, ...conversation];
+    const messages = [{ role: 'system', content: App.host.systemPrompt + metadataText }, ...conversation];
     const ms = Number(state.settings.maxAgentSteps);
     const maxSteps = Number.isFinite(ms) && ms > 0 ? ms : 8;
 
@@ -68,7 +68,7 @@
           const uiCall = { id: tc.id, name, args, status: 'running', result: '' };
           assistantUi.toolCalls.push(uiCall); App.render();
           let toolResult;
-          if (name === 'eval_officejs') {
+          if (name === App.host.evalToolName) {
             const code = String(args?.code || '');
             const ok = await App.confirmEvalCode(code);
             if (!ok) {
@@ -142,7 +142,10 @@
     const state = App.state;
     const tmp = Number(state.settings.temperature);
     const temperature = Number.isFinite(tmp) ? tmp : 0.2;
-    const body = { model: state.settings.model, messages, tools: App.TOOL_DEFINITIONS, tool_choice: 'auto', temperature, stream: true };
+    const tools = App.host.toolDefinitions;
+    const body = { model: state.settings.model, messages, temperature, stream: true };
+    // 仅在有工具时才声明 tools/tool_choice；空数组配 tool_choice:'auto' 会被部分 OpenAI 兼容后端拒绝。
+    if (Array.isArray(tools) && tools.length) { body.tools = tools; body.tool_choice = 'auto'; }
     if (state.settings.thinking && state.settings.thinking !== 'none') body.reasoning_effort = state.settings.thinking;
     const res = await fetch(App.chatEndpoint(), {
       method: 'POST',

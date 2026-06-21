@@ -9,20 +9,24 @@
     }
     if (typeof Office !== 'undefined' && Office.onReady) {
       try {
-        await Office.onReady();
+        const info = await Office.onReady();
+        // 优先用 Office 报告的宿主类型选择提供者，回退到运行时探测。
+        const hostType = App.hostTypeFromOffice(info && info.host) || App.detectHostType();
+        App.selectHost(hostType);
         if (App.hasOffice()) {
-          App.state.workbookId = await App.getWorkbookId();
-          const md = await App.getWorkbookMetadata().catch(() => null);
-          if (md) App.state.workbookLabel = md.workbookName || ''; // 不再显示当前选择范围，避免展示过期状态
+          App.state.workbookId = await App.getDocumentId();
+          const md = await App.host.getMetadata().catch(() => null);
+          // 仅 Excel 提供 workbookName；其余宿主保持空标签，避免展示过期状态。
+          if (md && md.workbookName) App.state.workbookLabel = md.workbookName;
         }
       } catch (e) {
         console.warn('[Office init]', e);
       }
     }
+    window.dpoqbExcelTools = App.host.toolExecutors;
     App.ensureSession();
     App.render();
   }
 
-  window.dpoqbExcelTools = App.TOOL_EXECUTORS;
   initOffice();
 })();

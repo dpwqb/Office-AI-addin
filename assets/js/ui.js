@@ -11,8 +11,6 @@
   const hasOffice = App.hasOffice;
   const PROVIDERS = App.PROVIDERS;
   const STORAGE_KEYS = App.STORAGE_KEYS;
-  const TOOL_DEFINITIONS = App.TOOL_DEFINITIONS;
-  const defaultArgsForTool = App.defaultArgsForTool;
   const getProviderModels = App.getProviderModels;
   const sessionsForCurrentWorkbook = App.sessionsForCurrentWorkbook;
   const renderMarkdown = App.renderMarkdown;
@@ -65,6 +63,10 @@
     const configured = Boolean(state.settings.apiKey && state.settings.model && state.settings.customPrefixUrl);
     const currentProvider = PROVIDERS[state.settings.provider] || PROVIDERS.Custom;
     const models = getProviderModels(state.settings.provider);
+    const toolDefs = (App.host && App.host.toolDefinitions) || [];
+    const defaultArgsForTool = (App.host && App.host.defaultArgsForTool) || (() => '{}');
+    const brand = t('brand') === 'brand' ? 'dpoqb for Office' : t('brand');
+    const brandFooter = t('brandFooter') === 'brandFooter' ? 'dpoqb for Office · Plain Edition' : t('brandFooter');
     const visibleSessions = sessionsForCurrentWorkbook();
     const sessionsHtml = visibleSessions.length ? visibleSessions.map(s => {
       const pendingDelete = state.pendingDeleteSessionId === s.id;
@@ -80,16 +82,16 @@
         <h2>${t('title')}</h2>
         <p>${t('subtitle')}</p>
         <div class="prompt-grid">
-          <button class="prompt-card" data-prompt="${escapeHtml(state.locale === 'zh' ? '请根据当前表格数据结构，生成合适的可视化图表' : 'Generate charts to visualize my data and apply professional styling')}"><strong>${t('chart')}</strong><span>${t('chartDesc')}</span></button>
-          <button class="prompt-card" data-prompt="${escapeHtml(state.locale === 'zh' ? '帮我检查当前表格中的错误内容，定位问题并给出修复后的正确结果' : 'Check my spreadsheet for formula errors and fix them automatically')}"><strong>${t('fix')}</strong><span>${t('fixDesc')}</span></button>
-          <button class="prompt-card" data-prompt="${escapeHtml(state.locale === 'zh' ? '帮我全面分析表中所有内容，并输出汇总结果与关键分析结论' : 'Analyze all workbook contents and summarize key conclusions')}"><strong>${t('analyze')}</strong><span>${t('analyzeDesc')}</span></button>
+          <button class="prompt-card" data-prompt="${escapeHtml(t('chartPrompt'))}"><strong>${t('chart')}</strong><span>${t('chartDesc')}</span></button>
+          <button class="prompt-card" data-prompt="${escapeHtml(t('fixPrompt'))}"><strong>${t('fix')}</strong><span>${t('fixDesc')}</span></button>
+          <button class="prompt-card" data-prompt="${escapeHtml(t('analyzePrompt'))}"><strong>${t('analyze')}</strong><span>${t('analyzeDesc')}</span></button>
         </div>
       </div>`;
     document.getElementById('container').innerHTML = `
       <div class="app">
         <header class="header">
           <img class="logo" src="assets/logo.png" alt="logo" />
-          <div class="title"><strong>dpoqb in Excel</strong><span>${escapeHtml(state.workbookLabel || (configured ? t('configuredShort') : t('notConfiguredShort')))}</span></div>
+          <div class="title"><strong>${escapeHtml(brand)}</strong><span>${escapeHtml(state.workbookLabel || (configured ? t('configuredShort') : t('notConfiguredShort')))}</span></div>
           <div class="session-menu-wrap">
             <button class="session-trigger" data-action="toggle-session-menu" title="${t('sessionHistory')}"><span>${t('sessions')}</span><strong>⌄</strong></button>
             ${state.sessionMenuOpen ? `<div class="session-menu">
@@ -135,14 +137,14 @@
           <section class="panel tools-panel ${state.tab === 'tools' ? 'active' : ''}">
             <div class="section tool-runner">
               <h3>${t('manualTool')}</h3>
-              <div class="field"><label>${t('toolName')}</label><select id="manual-tool">${TOOL_DEFINITIONS.map(x => `<option value="${x.function.name}">${x.function.name}</option>`).join('')}</select></div>
-              <div class="field"><label>${t('params')}</label><textarea id="manual-args">${escapeHtml(defaultArgsForTool(TOOL_DEFINITIONS[0].function.name))}</textarea></div>
+              <div class="field"><label>${t('toolName')}</label><select id="manual-tool">${toolDefs.map(x => `<option value="${x.function.name}">${x.function.name}</option>`).join('')}</select></div>
+              <div class="field"><label>${t('params')}</label><textarea id="manual-args">${escapeHtml(toolDefs[0] ? defaultArgsForTool(toolDefs[0].function.name) : '{}')}</textarea></div>
               <button class="primary-btn" data-action="run-tool">${t('run')}</button>
               <pre class="output">${escapeHtml(state.toolOutput || t('output'))}</pre>
             </div>
           </section>
         </main>
-        <footer class="footer"><span>dpoqb in Excel · Plain Edition</span><span>${escapeHtml(state.settings.model || '')}</span></footer>
+        <footer class="footer"><span>${escapeHtml(brandFooter)}</span><span>${escapeHtml(state.settings.model || '')}</span></footer>
         ${state.pendingEval ? `<div class="modal-overlay">
           <div class="modal">
             <div class="modal-title">${t('confirmEval')}</div>
@@ -361,7 +363,8 @@
     }
     if (ev.target.id === 'manual-tool') {
       const args = document.getElementById('manual-args');
-      if (args) args.value = defaultArgsForTool(ev.target.value);
+      const fn = App.host && App.host.defaultArgsForTool;
+      if (args && fn) args.value = fn(ev.target.value);
     }
   });
 
