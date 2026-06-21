@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>dpoqb in Excel（Beta）</title>
+	<title>dpoqb for Office</title>
 
 	<style>
 		:root {
@@ -352,7 +352,7 @@
 <div class="layout">
 
 	<aside class="sidebar">
-		<h2>dpoqb in Excel</h2>
+		<h2>dpoqb for Office</h2>
 
 		<nav>
 			<a href="#overview">产品概述</a>
@@ -367,12 +367,14 @@
 		<section class="hero">
 			<div class="badge">Beta</div>
 
-			<h1>dpoqb in Excel</h1>
+			<h1>dpoqb for Office</h1>
 
 			<p>
-				dpoqb in Excel 是适配 Excel 官方的 AI 插件，以侧边栏集成和展示，
-				通过自然语言交互赋能表格工作流，实现数据解释、公式生成、
-				图表可视化、公式错误检测与修复、跨 sheet 页查询等任务的自动化执行。
+				dpoqb for Office 是适配 Microsoft Office 官方的 AI 插件，支持
+				<strong>Excel、Word、PowerPoint</strong> 三大应用，以侧边栏集成和展示，
+				通过自然语言交互赋能文档工作流。插件会自动识别当前所在的 Office 应用，
+				加载对应的工具集——在 Excel 中处理数据与公式、在 Word 中撰写与排版、
+				在 PowerPoint 中生成与整理幻灯片。
 			</p>
 		</section>
 
@@ -382,47 +384,54 @@
 			<div class="card">
 
 				<p>
-					dpoqb in Excel 是适配 Excel 官方的 AI 插件，以侧边栏集成和展示，
-					通过自然语言交互赋能表格工作流，实现
-					<strong>数据解释、公式生成、图表可视化、公式错误检测与修复、跨sheet页查询</strong>
-					等任务的自动化执行。
+					dpoqb for Office 是适配 Microsoft Office 官方的 AI 插件，覆盖
+					<strong>Excel / Word / PowerPoint</strong>，以侧边栏集成和展示，
+					通过自然语言交互赋能文档工作流。一套插件按宿主自适应，分别实现
+					<strong>表格数据处理、文档撰写排版、演示文稿生成</strong>等任务的自动化执行。
 				</p>
 
 				<p>
-					核心由 GPT 模型、Agent SDK/Agent loop、Skills等模块驱动，
-					适配 Microsoft 365 的 Excel 环境，其核心交互与能力如下：
+					核心由 GPT 模型、Agent SDK/Agent loop、Skills 等模块驱动，
+					适配 Microsoft 365 的 Office 环境，其核心交互与能力如下：
 				</p>
 
 				<ul>
 					<li>
 						<strong>自然语言驱动：</strong>
-						在侧边栏输入指令（如 “制作可视化图表”“修复 #REF! 错误”），
-						LLM 直接解析并操作表格，生成可追溯的单元格级引用。
+						在侧边栏输入指令（如 Excel 中“制作可视化图表”“修复 #REF! 错误”、
+						Word 中“在文末续写一段总结”、PowerPoint 中“新增一页幻灯片”），
+						LLM 直接解析并操作文档，生成可追溯的内容级引用。
 					</li>
 
 					<li>
 						<strong>闭环执行流程：</strong>
 						Agent 拆解任务 → 调用相应的 tools →
 						Agent Loop 校验结果 →
-						在 Excel 中直接修改并高亮变更，全程不离开表格环境。
+						在当前 Office 应用中直接修改并定位变更，全程不离开文档环境。
+					</li>
+
+					<li>
+						<strong>宿主自适应：</strong>
+						插件根据当前所在的 Excel / Word / PowerPoint 自动切换工具集与提示词，
+						无需用户手动选择。
 					</li>
 				</ul>
 
 				<div class="callout tip">
 					<div class="callout-title">Tip</div>
-					dpoqb in Excel 插件支持多种模型配置及调用。
+					dpoqb for Office 插件支持多种模型配置及调用。
 				</div>
 
 				<div class="callout info">
 					<div class="callout-title">Info</div>
 
-					<p><strong>视频展示功能点：</strong></p>
+					<p><strong>各宿主典型能力：</strong></p>
 
-					<p><strong>1. 图表生成：</strong> 一键生成可视化并美化</p>
+					<p><strong>Excel：</strong> 图表生成、公式错误检测与修复、跨 Sheet 导航 / VLOOKUP、数据读写与透视。</p>
 
-					<p><strong>2. 错误修复：</strong> 自动检测并修复公式错误</p>
+					<p><strong>Word：</strong> 大纲解析、撰写与续写、查找替换、套用标题样式、插入表格 / 图片、批注。</p>
 
-					<p><strong>3. 多 Sheet 导航/vlookup：</strong> 跨工作表自动操作</p>
+					<p><strong>PowerPoint：</strong> 演示大纲解析、增删幻灯片、设置讲稿备注、插入文本框、跳转定位。</p>
 				</div>
 
 			</div>
@@ -536,11 +545,53 @@
 					</ul>
 				</div>
 
+				<div class="feature-card">
+					<h3>文档撰写与编辑（Word）</h3>
+
+					<ul>
+						<li><strong>报告与公文：</strong> 按大纲撰写 / 续写正文，统一标题层级与样式，一键插入数据表格。</li>
+						<li><strong>校对润色：</strong> 全文查找替换、修正措辞语法，关键处插入批注供复核。</li>
+						<li><strong>结构提炼：</strong> 解析文档大纲，生成摘要与结论，定位跳转到指定段落。</li>
+					</ul>
+				</div>
+
+				<div class="feature-card">
+					<h3>演示文稿制作（PowerPoint）</h3>
+
+					<ul>
+						<li><strong>快速成稿：</strong> 按主题新增幻灯片、插入文本框与要点，整理演示结构。</li>
+						<li><strong>讲稿备注：</strong> 为每页自动生成讲稿备注，辅助演讲准备。</li>
+						<li><strong>大纲梳理：</strong> 读取演示大纲、精炼要点文字，跳转定位到指定幻灯片。</li>
+					</ul>
+				</div>
+
 			</div>
 		</section>
 
 		<section id="setup">
 			<h2>配置步骤</h2>
+
+			<div class="callout info">
+				<div class="callout-title">先选择目标应用</div>
+
+				<p>
+					每个 Office 应用需要使用各自的清单文件（manifest）。请根据要安装到的应用下载对应文件，
+					再按下方步骤旁加载。三套清单指向同一插件，安装方式完全一致，只是文件不同：
+				</p>
+
+				<p>
+					<a class="download-btn" href="manifest.excel.prod.xml" download>↓ Excel：manifest.excel.prod.xml</a>
+					<a class="download-btn" href="manifest.word.prod.xml" download>↓ Word：manifest.word.prod.xml</a>
+					<a class="download-btn" href="manifest.ppt.prod.xml" download>↓ PowerPoint：manifest.ppt.prod.xml</a>
+				</p>
+
+				<p>
+					下文步骤以 <strong>Excel + <code>manifest.excel.prod.xml</code></strong> 为例；
+					安装到 Word 或 PowerPoint 时，将文件名替换为
+					<code>manifest.word.prod.xml</code> 或 <code>manifest.ppt.prod.xml</code>，
+					并把对应的应用、Wef 目录与信任中心操作改为目标应用即可。
+				</p>
+			</div>
 
 			<div class="tabs">
 
@@ -561,35 +612,36 @@
 					<div class="card">
 
 						<div class="step">
-							<div class="step-title">第一步：确认已安装 Microsoft Excel</div>
+							<div class="step-title">第一步：确认已安装目标 Office 应用</div>
 
 							<p>在开始安装插件前，请确保：</p>
 
 							<ul>
-								<li>电脑已安装 <strong>Microsoft Excel（Microsoft 365 或 Office 2016 及以上版本）</strong></li>
-								<li>Excel 可以正常打开</li>
+								<li>电脑已安装 <strong>目标 Office 应用（Excel / Word / PowerPoint，Microsoft 365 或 Office 2016 及以上版本）</strong></li>
+								<li>该应用可以正常打开</li>
 								<li>当前账户具有本机文件读写权限</li>
 							</ul>
 
 							<p>
-								如果尚未安装 Excel，请先安装 Microsoft Office 后再继续以下步骤。
+								如果尚未安装，请先安装 Microsoft Office 后再继续以下步骤。
 							</p>
 						</div>
 
 						<div class="step">
 							<div class="step-title">第二步：下载清单文件</div>
 
-							<a class="download-btn" href="manifest.prod.xml" download>↓ 下载 manifest.prod.xml</a>
-
 							<p>
-								下载文件：
-								<code>manifest.prod.xml</code>
+								下载与目标应用对应的清单文件（见本节顶部下载区）：
+								Excel 用 <code>manifest.excel.prod.xml</code>、
+								Word 用 <code>manifest.word.prod.xml</code>、
+								PowerPoint 用 <code>manifest.ppt.prod.xml</code>。
 							</p>
 
 							<p>下载完成后请确认：</p>
 
 							<ul>
-								<li>文件名称为 <code>manifest.prod.xml</code></li>
+								<li>文件名称与目标应用一致（如 <code>manifest.excel.prod.xml</code>）</li>
+								<li>文件后缀为 <code>.xml</code></li>
 							</ul>
 						</div>
 
@@ -604,15 +656,15 @@
 							</p>
 
 							<p>
-								输入：
+								输入（Windows 上 Excel / Word / PowerPoint 共用同一 Wef 目录）：
 								<code>%LOCALAPPDATA%\Microsoft\Office\16.0\Wef</code>
 							</p>
 
 							<h3>2. 放入清单文件</h3>
 
 							<p>
-								将：
-								<code>manifest.prod.xml</code>
+								将下载好的清单文件（如
+								<code>manifest.excel.prod.xml</code>）
 								复制到：
 								<code>Wef 文件夹根目录</code>
 							</p>
@@ -649,16 +701,17 @@
 						</div>
 
 						<div class="step">
-							<div class="step-title">第四步：在 Excel 中信任共享路径</div>
+							<div class="step-title">第四步：在目标应用中信任共享路径</div>
 
 							<p>
-								完成共享后，需要在 Excel 中将该网络路径添加为“受信任的加载项目录”。
+								完成共享后，需要在目标 Office 应用（Excel / Word / PowerPoint）中
+								将该网络路径添加为“受信任的加载项目录”。
 							</p>
 
 							<h3>1. 打开信任中心</h3>
 
 							<p>
-								在 Excel 中依次点击：
+								在目标应用中依次点击：
 								<code>文件 → 选项 → 信任中心 → 信任中心设置(T)…</code>
 							</p>
 
@@ -676,14 +729,20 @@
 								示例路径：
 								<code>\\DESKTOP-XXXX\…\Wef</code>
 							</p>
+
+							<div class="callout tip">
+								<div class="callout-title">提示</div>
+								信任中心的设置按应用独立。若要在多个 Office 应用中使用插件，
+								需在每个应用里分别添加同一条受信任目录。
+							</div>
 						</div>
 
 						<div class="step">
-							<div class="step-title">第五步：在 Excel 中加载插件</div>
+							<div class="step-title">第五步：在目标应用中加载插件</div>
 
 							<ol>
-								<li>完全退出 Excel</li>
-								<li>重新打开 Excel 后：进入 <code>文件 → 选项 → 自定义功能区</code></li>
+								<li>完全退出目标应用</li>
+								<li>重新打开后：进入 <code>文件 → 选项 → 自定义功能区</code></li>
 								<li>找到 <code>我的加载项</code> 将其添加到选项卡</li>
 								<li>打开选项卡，点击：<code>我的加载项</code> 的下拉项</li>
 								<li>找到插件</li>
@@ -691,7 +750,7 @@
 							</ol>
 
 							<p>
-								插件加载完成后，即可在 Excel 中使用。
+								插件加载完成后，即可在目标应用中使用。插件会自动识别当前应用并加载对应工具集。
 							</p>
 						</div>
 
@@ -706,35 +765,36 @@
 					<div class="card">
 
 						<div class="step">
-							<div class="step-title">第一步：确认已安装 Microsoft Excel</div>
+							<div class="step-title">第一步：确认已安装目标 Office 应用</div>
 
 							<p>在开始安装插件前，请确保：</p>
 
 							<ul>
-								<li>已安装 <strong>Microsoft Excel for Mac（Microsoft 365 或 Office 2019 及以上版本）</strong></li>
-								<li>Excel 可以正常启动</li>
+								<li>已安装 <strong>目标 Office for Mac 应用（Excel / Word / PowerPoint，Microsoft 365 或 Office 2019 及以上版本）</strong></li>
+								<li>该应用可以正常启动</li>
 								<li>当前用户账户具有文件读写权限</li>
 							</ul>
 
 							<p>
-								如果尚未安装 Excel，请先完成 Office 安装后再继续以下步骤。
+								如果尚未安装，请先完成 Office 安装后再继续以下步骤。
 							</p>
 						</div>
 
 						<div class="step">
 							<div class="step-title">第二步：下载清单文件</div>
 
-							<a class="download-btn" href="manifest.prod.xml" download>↓ 下载 manifest.prod.xml</a>
-
 							<p>
-								下载文件：
-								<code>manifest.prod.xml</code>
+								下载与目标应用对应的清单文件（见本节顶部下载区）：
+								Excel 用 <code>manifest.excel.prod.xml</code>、
+								Word 用 <code>manifest.word.prod.xml</code>、
+								PowerPoint 用 <code>manifest.ppt.prod.xml</code>。
 							</p>
 
 							<p>下载完成后请确认：</p>
 
 							<ul>
-								<li>文件名称为 <code>manifest.prod.xml</code></li>
+								<li>文件名称与目标应用一致（如 <code>manifest.excel.prod.xml</code>）</li>
+								<li>文件后缀为 <code>.xml</code></li>
 							</ul>
 						</div>
 
@@ -742,12 +802,14 @@
 							<div class="step-title">第三步：打开 Mac 上的 Wef 文件夹</div>
 
 							<p>
-								在 macOS 上，Wef 目录通常位于：
+								在 macOS 上，每个 Office 应用有各自独立的 Wef 目录。请根据目标应用选择对应路径：
 							</p>
 
-							<p>
-								<code>~/Library/Containers/com.microsoft.Excel/Data/Documents/wef/</code>
-							</p>
+							<ul>
+								<li>Excel：<code>~/Library/Containers/com.microsoft.Excel/Data/Documents/wef/</code></li>
+								<li>Word：<code>~/Library/Containers/com.microsoft.Word/Data/Documents/wef/</code></li>
+								<li>PowerPoint：<code>~/Library/Containers/com.microsoft.Powerpoint/Data/Documents/wef/</code></li>
+							</ul>
 
 							<p>
 								如未找到 <strong>wef</strong> 文件夹，请按以下步骤打开目录并创建：
@@ -756,7 +818,7 @@
 							<ol>
 								<li>打开 <strong>Finder</strong></li>
 								<li>点击顶部菜单 <strong>前往 → 前往文件夹…</strong></li>
-								<li>输入：
+								<li>输入对应应用的容器路径（去掉末尾 <code>wef/</code>），例如：
 									<code>~/Library/Containers/com.microsoft.Excel/Data/Documents/</code>
 								</li>
 								<li>
@@ -770,19 +832,20 @@
 							<div class="step-title">第四步：复制 manifest 文件</div>
 
 							<p>
-								将下载好的：
-								<code>manifest.prod.xml</code>
+								将下载好的清单文件（如
+								<code>manifest.excel.prod.xml</code>）
 							</p>
 
 							<p>
 								复制到：
-								<code>wef 文件夹根目录</code>
+								<code>对应应用的 wef 文件夹根目录</code>
 							</p>
 
 							<div class="callout tip">
 								<div class="callout-title">注意事项</div>
 
 								<ul>
+									<li>放入与目标应用匹配的容器 wef 目录（Excel / Word / PowerPoint 各自独立）</li>
 									<li>不要放入子文件夹</li>
 									<li>不要修改文件名</li>
 									<li>文件后缀必须为 <code>.xml</code></li>
@@ -791,11 +854,11 @@
 						</div>
 
 						<div class="step">
-							<div class="step-title">第五步：在 Excel 中加载插件</div>
+							<div class="step-title">第五步：在目标应用中加载插件</div>
 
 							<ol>
-								<li>完全退出 Excel</li>
-								<li>重新打开 Excel 后：进入 <code>文件 → 选项 → 自定义功能区</code></li>
+								<li>完全退出目标应用</li>
+								<li>重新打开后：进入 <code>文件 → 选项 → 自定义功能区</code></li>
 								<li>找到 <code>我的加载项</code> 将其添加到选项卡</li>
 								<li>打开选项卡，点击：<code>我的加载项</code> 的下拉项</li>
 								<li>找到插件</li>
@@ -803,7 +866,7 @@
 							</ol>
 
 							<p>
-								插件加载完成后，即可在 Excel 中使用。
+								插件加载完成后，即可在目标应用中使用。插件会自动识别当前应用并加载对应工具集。
 							</p>
 						</div>
 
@@ -816,7 +879,7 @@
 		</section>
 
 		<div class="footer">
-			dpoqb in Excel © Plain Rebuild Documentation
+			dpoqb for Office © Plain Rebuild Documentation
 		</div>
 
 	</main>

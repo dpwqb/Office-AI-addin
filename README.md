@@ -18,7 +18,7 @@
   - `app.js`：入口，`Office.onReady` 后按宿主类型选定 `App.host` 并首屏渲染。
 - `assets/css/app.css`：侧边栏样式。
 - `commands.html` / `assets/js/commands.js`：Ribbon 命令文件（宿主无关）。
-- `manifest.prod.xml` / `manifest.local.xml`：**Excel** 清单（`Host Name="Workbook"`）。
+- `manifest.excel.prod.xml` / `manifest.excel.local.xml`：**Excel** 清单（`Host Name="Workbook"`）。
 - `manifest.word.prod.xml` / `manifest.word.local.xml`：**Word** 清单（`Host Name="Document"`）。
 - `manifest.ppt.prod.xml` / `manifest.ppt.local.xml`：**PowerPoint** 清单（`Host Name="Presentation"`）。
   - 三套 manifest 的 `<Id>` 各自唯一，`SourceLocation` 均指向同一 `taskpane.html`。`*.prod.xml` 指向 `https://dpoqb.top`，`*.local.xml` 指向 `http://localhost`。
@@ -72,10 +72,10 @@ Office Add-in 需要 HTTP 静态服务器。把对应宿主 `manifest.*.local.xm
 
 ```bash
 cd office-addin-plain
-# 可用任意 HTTP 静态服务，端口与 manifest.local.xml 保持一致
+# 可用任意 HTTP 静态服务，端口与 manifest.excel.local.xml 保持一致
 ```
 
-- Excel → `manifest.local.xml`
+- Excel → `manifest.excel.local.xml`
 - Word → `manifest.word.local.xml`
 - PowerPoint → `manifest.ppt.local.xml`
 
