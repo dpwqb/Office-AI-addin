@@ -273,6 +273,24 @@
       await navigateCitation(ref).catch(e => alert(e.message));
       return;
     }
+    const copyBtn = ev.target.closest('button.md-copy');
+    if (copyBtn) {
+      const codeEl = copyBtn.closest('.md-codeblock')?.querySelector('pre.md-code code');
+      const text = codeEl ? codeEl.textContent : '';
+      const done = (label) => { copyBtn.textContent = label; setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1200); };
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+          document.body.appendChild(ta); ta.select();
+          document.execCommand('copy'); document.body.removeChild(ta);
+        }
+        done('Copied');
+      } catch { done('Failed'); }
+      return;
+    }
     const tab = ev.target.closest('[data-tab]');
     if (tab) { if (shouldCloseSessionMenu) { state.sessionMenuOpen = false; state.pendingDeleteSessionId = null; } state.tab = tab.dataset.tab; render(); return; }
     const prompt = ev.target.closest('[data-prompt]');

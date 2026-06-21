@@ -168,6 +168,18 @@ pre.output { margin: 0; padding: 12px; min-height: 140px; max-height: 280px; ove
 .markdown th, .markdown td { padding: 7px 9px; border-bottom: 1px solid var(--chat-border); text-align: left; vertical-align: top; }
 .markdown th { background: var(--chat-bg-secondary); font-weight: 700; }
 .markdown tr:last-child td { border-bottom: 0; }
+.markdown .md-codeblock { margin: .75em 0; border: 1px solid var(--chat-border); border-radius: 10px; overflow: hidden; background: var(--chat-bg-tertiary); }
+.markdown .md-codebar { display: flex; align-items: center; justify-content: space-between; padding: 4px 10px; background: var(--chat-bg-secondary); border-bottom: 1px solid var(--chat-border); font-size: 11px; }
+.markdown .md-lang { font-family: var(--chat-mono); color: var(--chat-text-secondary); text-transform: lowercase; }
+.markdown .md-copy { font-size: 11px; padding: 2px 8px; border: 1px solid var(--chat-border); border-radius: 6px; background: transparent; color: var(--chat-text-secondary); cursor: pointer; }
+.markdown .md-copy:hover { border-color: var(--chat-border-active); }
+.markdown .md-codeblock pre.md-code { margin: 0; border: 0; border-radius: 0; background: transparent; }
+.markdown a.citation { color: var(--chat-accent); border-bottom: 1px dashed var(--chat-accent); font-size: .85em; vertical-align: super; padding: 0 1px; }
+.markdown hr { border: 0; border-top: 1px solid var(--chat-border); margin: 1em 0; }
+.markdown ul.task-list { list-style: none; padding-left: .4em; }
+.markdown li.task-item { list-style: none; }
+.markdown li.task-item input[type=checkbox] { margin-right: .5em; vertical-align: middle; }
+.markdown img { max-width: 100%; height: auto; border-radius: 8px; display: block; margin: .5em 0; }
 @media (max-width: 420px) {
   .bubble { max-width: 96%; }
   .header { padding-inline: 8px; }
