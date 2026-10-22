@@ -3,10 +3,6 @@
   const App = (window.App = window.App || {});
 
   async function initOffice() {
-    if (navigator.userAgent.indexOf('Trident') !== -1 || navigator.userAgent.indexOf('Edge') !== -1) {
-      const legacy = document.getElementById('legacy-message');
-      if (legacy) legacy.hidden = false;
-    }
     if (typeof Office !== 'undefined' && Office.onReady) {
       try {
         const info = await Office.onReady();

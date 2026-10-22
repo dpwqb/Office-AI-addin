@@ -1,0 +1,32 @@
+name: Office 2019 compatibility build
+
+on:
+  push:
+    branches:
+      - 'ChatGPT/develop'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Generate legacy compatibility distribution
+        run: npm run build
+      - name: Check ES5 syntax and deployment files
+        run: npm run test:compat
+      - name: Check JSON and streaming AI transport
+        run: npm run test:transport
+      - uses: actions/upload-artifact@v4
+        with:
+          name: office-ai-addin-ie11-dist
+          path: dist/
+          if-no-files-found: error

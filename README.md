@@ -88,3 +88,28 @@ cd Office-AI-addin
 - 原包中的 `office.js` 来自 Microsoft 官方 CDN：`https://appsforoffice.microsoft.com/lib/1/hosted/office.js`。这是 Office Add-in 官方要求的运行时脚本，未内置到本地包。
 - 一个 manifest 只能绑定一个宿主，因此三宿主需各一份 manifest；但它们共用同一份 `taskpane.html` 与 `assets/`，运行时按 `Office.context.host` 自动选择工具集。
 - 图表/透视表（Excel）、内容控件/批注（Word）、形状/备注（PowerPoint）等 API 在不同 Excel/Word/PowerPoint 版本与 Web/Desktop 环境中兼容性可能不同；如某个 Office.js API 在目标环境不可用，可通过 `eval_officejs` 工具补充实现。
+
+
+## Office 2019 / IE11 兼容构建
+
+Office 2019 部分 Windows 版本使用 Trident/IE11 WebView。**不能直接将仓库源码目录部署给 IE11**，原始 `assets/js/` 仍包含现代 JavaScript。请部署 **`dist/` 构建产物**。
+
+```bash
+npm install
+npm run build
+npm run test:compat
+npm run test:transport
+```
+
+Node.js 18+。将 `dist/` **内部所有文件**部署到网站根目录（例如 `http://dldwa01406/` 或生产 HTTPS 网站），确保 `taskpane.html` 请求的是 `assets/js/office-compat.bundle.js`，而不是单独的现代 `assets/js/app.js`。manifest 的既有 ID 和 URL 均不变。
+
+- 构建使用 Babel + Webpack 输出 ES5，先载入 `core-js`、`regenerator-runtime`、Fetch/XHR、AbortController polyfills，再按原有顺序执行 `window.App` 脚本。
+- Office.js 载入后立即注册 ES5 格式的 `Office.onReady` 回调，避免兼容包加载时间造成的未初始化提示。
+- 支持 Fetch ReadableStream + TextDecoder 的环境保留流式 AI 对话；IE11 在发出请求时改为 `stream:false`，并读取完整 JSON 响应。API 服务必须支持非流式。
+- 如某宿主缺少 `Excel.run`、`Word.run` 或 `PowerPoint.run`，将不向模型暴露对应工具。**此构建不能凭空补足较新的 Office.js API**；高级文档操作可能仍需要按功能降级。
+- `dist` 包含 commands、CSS、图片、manifest 和安装说明，请勿仅上传 bundle。
+- PR 的 GitHub Actions 会构建、用 Acorn 检查 ES5 语法并提供 `dist` artifact。**CI 不是 Office 2019 真机测试**；仍需要测试插件界面、非流式 AI 对话和各宿主基础读写。
+
+如仍看到旧版报错，首先确认没有部署未经构建的源文件，检查 Office 加载项缓存及网络请求。
+
+- IE11 不支持 CSS 自定义变量：构建自动输出 `assets/css/app.ie11.css`，并只在不支持 CSS 变量的浏览器中加载；同时生成浅色和深色兼容配色。现代浏览器继续使用原 CSS。

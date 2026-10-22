@@ -139,7 +139,13 @@
     const tmp = Number(state.settings.temperature);
     const temperature = Number.isFinite(tmp) ? tmp : 0.2;
     const tools = App.host.toolDefinitions;
-    const body = { model: state.settings.model, messages, temperature, stream: true };
+    // IE11 can use fetch/XHR polyfills, but it cannot read Fetch response streams.
+    // Ask the API for JSON before sending the request in that environment.
+    const canStream = typeof ReadableStream === 'function' &&
+      typeof TextDecoder === 'function' &&
+      typeof Response !== 'undefined' &&
+      Response.prototype && ('body' in Response.prototype);
+    const body = { model: state.settings.model, messages, temperature, stream: !!canStream };
     // 仅在有工具时才声明 tools/tool_choice；空数组配 tool_choice:'auto' 会被部分 OpenAI 兼容后端拒绝。
     if (Array.isArray(tools) && tools.length) { body.tools = tools; body.tool_choice = 'auto'; }
     if (state.settings.thinking && state.settings.thinking !== 'none') body.reasoning_effort = state.settings.thinking;
@@ -156,13 +162,16 @@
     }
 
     const contentType = res.headers && res.headers.get ? (res.headers.get('content-type') || '') : '';
-    if (!res.body || typeof res.body.getReader !== 'function' || contentType.includes('application/json')) {
+    if (!canStream || contentType.includes('application/json')) {
       const json = await res.json();
       const content = json.choices?.[0]?.message?.content || '';
       if (content && options.onContent) options.onContent(content);
       return json;
     }
 
+    if (!res.body || typeof res.body.getReader !== 'function') {
+      throw new Error('Streaming API response is not readable by this Office WebView.');
+    }
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     const toolCalls = [];
