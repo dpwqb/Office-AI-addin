@@ -26,7 +26,11 @@
       settings.saveAsync(r => r.status === Office.AsyncResultStatus.Succeeded ? resolve(v) : reject(new Error(r.error?.message || 'Failed to save document ID')));
     });
   }
-  function requireOffice() { if (!App.hasOffice()) throw new Error(App.t('demo')); }
+  function requireOffice() {
+    if (!App.hasOffice()) {
+      throw new Error('The current Office version does not expose the required host APIs (Excel.run / Word.run / PowerPoint.run), or Office initialization has not completed.');
+    }
+  }
 
   // ---- 非 Office 环境 / 未识别宿主时的占位提供者 ----
   function makeDemoHost(hostType) {
@@ -65,7 +69,18 @@
   }
   function selectHost(type) {
     const provider = type && App.HOSTS[type];
-    App.host = provider || makeDemoHost(type);
+    if (!provider) {
+      App.host = makeDemoHost(type);
+      return App.host;
+    }
+    const runAvailable = (type === 'excel' && typeof Excel !== 'undefined' && typeof Excel.run === 'function') ||
+      (type === 'word' && typeof Word !== 'undefined' && typeof Word.run === 'function') ||
+      (type === 'powerpoint' && typeof PowerPoint !== 'undefined' && typeof PowerPoint.run === 'function');
+    // Old hosts can identify themselves while not providing the application-specific API.
+    // Keep chat UI available, but do not advertise unavailable document tools.
+    App.host = runAvailable ? provider : Object.assign({}, provider, {
+      available: false, toolDefinitions: [], toolExecutors: {}
+    });
     return App.host;
   }
 

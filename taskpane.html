@@ -6,6 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>dpoqb AI for Office</title>
   <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <script>
+    // Register immediately (ES5 syntax) for older Office WebViews.
+    if (typeof Office !== 'undefined' && typeof Office.onReady === 'function') {
+      Office.onReady(function (info) { window.__officeReadyInfo = info; });
+    }
+  </script>
   <link rel="stylesheet" href="assets/css/app.css" />
 </head>
 <body>
