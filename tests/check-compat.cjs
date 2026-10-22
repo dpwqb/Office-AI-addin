@@ -8,6 +8,7 @@ const bundle = fs.readFileSync(path.join(dist, 'assets/js/office-compat.bundle.j
 const html = fs.readFileSync(path.join(dist, 'taskpane.html'), 'utf8');
 
 assert(bundle.length > 10000, 'Expected application and polyfills in bundle');
+assert(bundle.includes('msMatchesSelector'), 'Missing IE11 Element.matches / closest polyfill');
 acorn.parse(bundle, { ecmaVersion: 5, sourceType: 'script' });
 assert(html.includes('Office.onReady(function (info)'), 'Missing early Office onReady callback');
 assert(html.includes('assets/js/office-compat.bundle.js'), 'Missing bundle reference');
