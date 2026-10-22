@@ -23,6 +23,8 @@ jobs:
         run: npm run build
       - name: Check ES5 syntax and deployment files
         run: npm run test:compat
+      - name: Check JSON and streaming AI transport
+        run: npm run test:transport
       - uses: actions/upload-artifact@v4
         with:
           name: office-ai-addin-ie11-dist

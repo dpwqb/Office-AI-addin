@@ -98,6 +98,7 @@ Office 2019 部分 Windows 版本使用 Trident/IE11 WebView。**不能直接将
 npm install
 npm run build
 npm run test:compat
+npm run test:transport
 ```
 
 Node.js 18+。将 `dist/` **内部所有文件**部署到网站根目录（例如 `http://dldwa01406/` 或生产 HTTPS 网站），确保 `taskpane.html` 请求的是 `assets/js/office-compat.bundle.js`，而不是单独的现代 `assets/js/app.js`。manifest 的既有 ID 和 URL 均不变。

@@ -5,7 +5,8 @@
   "description": "Office AI add-in with an IE11/Office 2019 compatible distribution",
   "scripts": {
     "build": "node scripts/build.cjs",
-    "test:compat": "node tests/check-compat.cjs"
+    "test:compat": "node tests/check-compat.cjs",
+    "test:transport": "node tests/api-transport.cjs"
   },
   "engines": {
     "node": ">=18"
