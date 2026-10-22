@@ -16,4 +16,8 @@ assert(!html.includes('legacy-message'), 'Unconditional legacy warning remains')
 assert(fs.existsSync(path.join(dist, 'assets/js/commands.js')), 'Commands JS missing');
 assert(fs.existsSync(path.join(dist, 'manifest.excel.prod.xml')), 'Manifest missing');
 assert(fs.existsSync(path.join(dist, 'assets/logo.png')), 'Logo missing');
+const ieCss = fs.readFileSync(path.join(dist, 'assets/css/app.ie11.css'), 'utf8');
+assert(!ieCss.includes('var(--'), 'IE11 CSS still contains unresolved variables');
+assert(ieCss.includes('[data-theme="dark"] .app'), 'Dark-mode legacy styles missing');
+assert(html.includes('assets/css/app.ie11.css'), 'Missing runtime legacy CSS loader');
 console.log('PASS: ES5 syntax and Office compatibility distribution checks');

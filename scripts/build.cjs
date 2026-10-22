@@ -43,8 +43,59 @@ function buildHtml() {
       '    }\n' +
       '  </script>');
   }
+  const cssTag = '<link rel="stylesheet" href="assets/css/app.css" />';
+  if (!html.includes(cssTag)) throw new Error('Stylesheet reference not found');
+  const cssBootstrap =
+    '\n  <script>\n' +
+    '    // IE11 does not support CSS custom properties (var(--...)).\n' +
+    '    if (!window.CSS || !window.CSS.supports || !window.CSS.supports("color", "var(--test)")) {\n' +
+    '      var sheet = document.createElement("link");\n' +
+    '      sheet.rel = "stylesheet"; sheet.href = "assets/css/app.ie11.css";\n' +
+    '      document.getElementsByTagName("head")[0].appendChild(sheet);\n' +
+    '    }\n' +
+    '  </script>';
+  html = html.replace(cssTag, cssTag + cssBootstrap);
   html = html.replace(/\s*<div id="legacy-message"[^>]*>[\s\S]*?<\/div>/, '');
   fs.writeFileSync(path.join(DIST, 'taskpane.html'), html);
+}
+
+function buildLegacyCss() {
+  const source = fs.readFileSync(path.join(ROOT, 'assets/css/app.css'), 'utf8');
+  const rootBlock = source.match(/:root\s*\{([^}]*)\}/);
+  const darkBlock = source.match(/\[data-theme="dark"\]\s*\{([^}]*)\}/);
+  if (!rootBlock || !darkBlock) throw new Error('Missing light or dark CSS variables');
+  function variables(block, fallback) {
+    const values = Object.assign({}, fallback || {});
+    block.replace(/(--[\w-]+)\s*:\s*([^;]+);/g, function (_, key, value) {
+      values[key] = value.trim();
+      return '';
+    });
+    return values;
+  }
+  const light = variables(rootBlock[1]);
+  const dark = variables(darkBlock[1], light);
+  function resolve(css, values) {
+    return css.replace(/var\(\s*(--[\w-]+)\s*\)/g, function (match, key) {
+      return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : match;
+    });
+  }
+  const darkRules = [];
+  const ruleRe = /([^{}]+)\{([^{}]*)\}/g;
+  let rule;
+  while ((rule = ruleRe.exec(source)) !== null) {
+    const selector = rule[1].trim();
+    if (!rule[2].includes('var(') || selector[0] === '@' ||
+        selector === ':root' || selector === '[data-theme="dark"]') continue;
+    const scoped = selector.split(',').map(function (part) {
+      return '[data-theme="dark"] ' + part.trim();
+    }).join(', ');
+    darkRules.push(scoped + ' {' + resolve(rule[2], dark) + '}');
+  }
+  const legacy = resolve(source, light) +
+    '\n/* IE11 dark-mode overrides (CSS custom properties are unavailable). */\n' +
+    darkRules.join('\n');
+  if (legacy.includes('var(--')) throw new Error('Unresolved IE11 CSS variable');
+  fs.writeFileSync(path.join(DIST, 'assets/css/app.ie11.css'), legacy);
 }
 
 fs.rmSync(DIST, { recursive: true, force: true });
@@ -60,6 +111,7 @@ webpack(config, (error, stats) => {
     ].forEach(copyIfPresent);
     fs.readdirSync(ROOT).filter(name => /^manifest\..+\.xml$/.test(name))
       .forEach(copyIfPresent);
+    buildLegacyCss();
     buildHtml();
     console.log('Office compatibility site built in dist/. Serve dist/ as the web root.');
     console.log(stats.toString({ all: false, assets: true, timings: true }));
